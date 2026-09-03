@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=0.3, maximum-scale=4, user-scalable=yes">
+<meta name="theme-color" content="#137333">
+<link rel="manifest" href="manifest.webmanifest">
+<script src="firebase-config.js"></script>
+<link rel="icon" href="icons/sb-bala-192.png" type="image/svg+xml">
+<title>Sumit Bhadwal Application</title>
+<style>
+*{box-sizing:border-box}html,body{touch-action:auto}body{margin:0;background:#f3f6f4;font-family:Arial,sans-serif;color:#17201a}
+header{background:#137333;color:#fff;text-align:center;padding:14px;position:sticky;top:0;z-index:10}
+header h1{margin:0;font-size:22px}.wrap{max-width:1250px;margin:auto;padding:12px}
+.rate-grid{display:grid;grid-template-columns:repeat(12,minmax(125px,1fr));gap:8px;overflow-x:auto;padding-bottom:5px}
+.rate-box{background:#fff;border-radius:10px;padding:9px;box-shadow:0 2px 7px #0001;min-width:125px}
+.rate-box b{display:block;font-size:13px;height:34px}.rate-box input{width:100%;padding:9px;border:1px solid #bdc8c0;border-radius:7px;font-size:16px}
+.tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin:13px 0}
+.tabs button{padding:11px 5px;border:0;border-radius:8px;background:#dce8df;font-weight:bold;font-size:14px}.tabs button.active{background:#137333;color:#fff}
+.panel{background:#fff;border-radius:12px;padding:13px;box-shadow:0 2px 8px #0001;overflow-x:auto}
+.hidden{display:none}.note{font-size:13px;color:#59635d;margin:4px 0 12px}
+table{width:100%;border-collapse:collapse;min-width:980px}th,td{border:1px solid #d5ded8;padding:8px;text-align:center;white-space:nowrap}table th:nth-child(1),table td:nth-child(1){min-width:180px;width:20%}table th:nth-child(2),table td:nth-child(2){min-width:125px}table th:nth-child(3),table td:nth-child(3){min-width:90px}table th:nth-child(4),table td:nth-child(4){min-width:125px}table th:nth-child(5),table td:nth-child(5){min-width:90px}table th:nth-child(6),table td:nth-child(6){min-width:105px}table th:nth-child(7),table td:nth-child(7),table th:nth-child(8),table td:nth-child(8),table th:nth-child(9),table td:nth-child(9){min-width:105px}th{background:#e8f1ea}
+td input{width:100%;padding:9px;border:1px solid #bdc8c0;border-radius:6px;font-size:16px;min-width:0}td select{width:100%;padding:9px;border:1px solid #bdc8c0;border-radius:6px;font-size:15px}.basic,.final{font-weight:bold}
+button{border:0;border-radius:7px;padding:8px 11px;cursor:pointer}.green{background:#137333;color:#fff}.blue{background:#1565c0;color:#fff}.gray{background:#53635a;color:#fff}.red{background:#b3261e;color:#fff}
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.status{font-size:12px;color:#137333;font-weight:bold;margin-left:5px}
+@media(max-width:850px){.tabs{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:520px){.tabs{grid-template-columns:repeat(2,1fr)}}
+
+.tools{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin:8px 0}.tools input{flex:1;min-width:180px;padding:9px;border:1px solid #bdc8c0;border-radius:7px;font-size:15px}.count{font-size:12px;color:#59635d;font-weight:bold}
+</style>
+</head>
+<body>
+<header><h1>SUMIT BHADWAL APPLICATION</h1><div>JAIN COAL TRADERS • RATE MASTER <span id="cloudStatus" style="font-size:12px;opacity:.9">• Local</span></div></header>
+<div class="zoombar"><button onclick="changeZoom(-.1)">−</button><span id="zoomLabel">100%</span><button onclick="changeZoom(.1)">+</button><button onclick="setZoom(.5)">50%</button><button onclick="setZoom(.75)">75%</button><button onclick="setZoom(1)">100%</button><button onclick="setZoom(1.5)">150%</button></div><div class="wrap">
+<div class="panel" style="margin-bottom:12px;overflow:visible">
+  <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+    <div><b>☁️ Cloud Sync</b><div id="cloudText" class="note" style="margin:3px 0 0">Mobile और computer का data एक जैसा रखने के लिए Cloud Account में login करें।</div></div>
+    <div class="actions" style="margin:0">
+      <button class="green" onclick="openCloud()">☁️ Cloud Login / Setup</button>
+      <button class="gray" onclick="cloudBackup()">⬇️ Cloud Backup</button>
+      <button class="gray" onclick="cloudRestore()">⬆️ Cloud Restore</button>
+    </div>
+  </div>
+</div>
+<div class="rate-grid" id="rateGrid"></div>
+<div class="tabs" id="tabs"></div>
+<div class="panel" id="panel"></div>
+</div>
+<div id="cloudModal" class="hidden" style="position:fixed;inset:0;background:#0008;z-index:9999;padding:18px;overflow:auto">
+ <div style="max-width:520px;margin:30px auto;background:#fff;border-radius:14px;padding:16px;box-shadow:0 8px 30px #0005">
+  <h2 style="margin-top:0">☁️ JCT Cloud Sync</h2>
+  <div id="cloudMsg" class="note"></div>
+  <input id="cloudEmail" type="email" placeholder="Email" style="width:100%;margin:5px 0">
+  <input id="cloudPass" type="password" placeholder="Password (कम से कम 6 characters)" style="width:100%;margin:5px 0">
+  <div class="actions">
+   <button class="green" onclick="cloudLogin()">Login</button>
+   <button class="gray" onclick="cloudSignup()">Create Account</button>
+   <button class="blue" onclick="cloudLogout()">Logout</button>
+   <button onclick="closeCloud()">Close</button>
+  </div>
+  <details style="margin-top:10px"><summary><b>पहली बार Setup कैसे होगा?</b></summary>
+   <div class="note" style="margin-top:8px">1) Firebase में नया project बनाइए। 2) Web App जोड़कर उसका config <b>firebase-config.js</b> में डालिए। 3) Authentication → Email/Password ON कीजिए। 4) Firestore Database बनाइए। 5) नीचे दिए Security Rules लगाइए। फिर इसी email/password से मोबाइल और computer दोनों में login करें।</div>
+   <pre style="white-space:pre-wrap;background:#f3f6f4;padding:9px;border-radius:8px;font-size:11px">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/jct/{docId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}</pre>
+  </details>
+ </div>
+</div>
+<script>
+let currentZoom=Number(localStorage.getItem("JCT_ZOOM")||"1");function applyZoom(){document.body.style.zoom=currentZoom;document.getElementById("zoomLabel").textContent=Math.round(currentZoom*100)+"%";localStorage.setItem("JCT_ZOOM",currentZoom)}function setZoom(v){currentZoom=Math.max(.3,Math.min(4,v));applyZoom()}function changeZoom(v){setZoom(Math.round((currentZoom+v)*10)/10)}
+const cats=[
+["pipe","PIPE"],["angle","ANGLE"],["tmt","सरिया / TMT"],["black","BLACK SHEET"],
+["color","COLOR SHEET"],["silver","SILVER SHEET"],["apollo","APOLLO PIPE"],["jyoti","JYOTI PIPE"],["other","OTHER"],["other1","OTHER 1"],["other2","OTHER 2"],["other3","OTHER 3"]
+];
+const key="JCT_RATE_MASTER_FINAL_V2";
+let active="pipe";
+const rateGrid=document.getElementById("rateGrid"),tabs=document.getElementById("tabs"),panel=document.getElementById("panel");
+
+function blank(){return {bases:{},rows:{}}}
+function getStore(){try{return JSON.parse(localStorage.getItem(key))||blank()}catch(e){return blank()}}
+function putStore(o){localStorage.setItem(key,JSON.stringify(o)); if(window.jctCloudPush) window.jctCloudPush()}
+function esc(s){return String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function fmt(n){return Number(n).toFixed(2).replace(/\.00$/,"")}
+
+const estTab=document.createElement("button");estTab.id="tab_estimate";estTab.textContent="📋 ESTIMATE";estTab.onclick=()=>showEstimate();tabs.appendChild(estTab);
+
+cats.forEach(([k,n])=>{
+ const b=document.createElement("div");b.className="rate-box";
+ b.innerHTML="<b>"+n+"</b><input id=\"base_"+k+"\" type=\"number\" step=\"0.01\" placeholder=\"Basic Rate\">";
+ rateGrid.appendChild(b);
+ document.getElementById("base_"+k).addEventListener("input",()=>{
+   const o=getStore();const v=document.getElementById("base_"+k).value;o.bases[k]=v;o.history=o.history||{};o.history[k]=o.history[k]||[];const last=o.history[k][0];if(v!==undefined && v!=="" && (!last || last.rate!==v)){o.history[k].unshift({rate:v,time:new Date().toISOString()});o.history[k]=o.history[k].slice(0,30);}putStore(o);calc();
+ });
+ const t=document.createElement("button");t.id="tab_"+k;t.textContent=n;t.onclick=()=>show(k);tabs.appendChild(t);
+});
+
+function renderRateInputs(){const o=getStore();cats.forEach(([k])=>{const el=document.getElementById("base_"+k);if(el)el.value=o.bases?.[k]??"";});}
+function show(k){
+ active=k;
+ cats.forEach(([x])=>document.getElementById("tab_"+x).classList.toggle("active",x===k));
+ document.getElementById("tab_estimate")?.classList.remove("active");
+ render();
+}
+function showEstimate(){
+ cats.forEach(([x])=>document.getElementById("tab_"+x).classList.remove("active"));
+ document.getElementById("tab_estimate")?.classList.add("active");
+ renderEstimate();
+}
+function renderEstimate(){
+ const o=getStore(); o.estimate=o.estimate||[]; o.estimateMeta=o.estimateMeta||{};
+ panel.innerHTML=`<h2>📋 Estimate Summary</h2>
+ <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin:10px 0">
+ <input id="partyName" placeholder="Customer / Party Name" style="padding:9px;border:1px solid #bdc8c0;border-radius:7px">
+ <input id="estimateNo" placeholder="Estimate No." style="padding:9px;border:1px solid #bdc8c0;border-radius:7px">
+ </div>
+ <div class="note">Rate Master से चुने गए सभी Size यहाँ एक साथ आएँगे। हर Size के साथ Quantity और Unit (KG/QUINTAL/TON आदि) चुनें। सभी चुने हुए माल एक ही Estimate में आएँगे और GST नीचे लगाया जा सकेगा।</div>
+ <div class="actions"><button class="red" id="clearEst">🗑️ Estimate Clear</button><button class="gray" id="printEst">🖨️ Print / PDF</button><span class="status" id="status"></span></div>
+ <table><thead><tr><th>Category</th><th>Size</th><th>Rate</th><th>Qty</th><th>Unit</th><th>Amount</th><th>Remove</th></tr></thead><tbody id="estBody"></tbody></table>
+ <div style="max-width:420px;margin:14px 0 0 auto;background:#f7faf8;padding:12px;border-radius:10px">
+ <label><b>GST %</b></label><input id="gstPct" type="number" step="0.01" value="${o.estimateMeta.gst??18}" style="width:100%;padding:9px;margin:5px 0 10px;border:1px solid #bdc8c0;border-radius:7px">
+ <div><b>Subtotal:</b> ₹ <span id="subTotal">0</span></div><div><b>GST:</b> ₹ <span id="gstAmt">0</span></div><div style="font-size:20px;margin-top:7px"><b>Grand Total:</b> ₹ <span id="grandTotal">0</span></div></div>`;
+ const body=document.getElementById("estBody");
+ o.estimate.forEach((it,i)=>{const tr=document.createElement("tr");tr.innerHTML=`<td>${esc(it.catName)}</td><td>${esc(it.size)}</td><td>₹ ${fmt(it.rate)}</td><td><input class="eqty" type="number" min="0" step="0.01" value="${it.qty||1}"></td><td><select class="eunit"><option>KG</option><option>QUINTAL</option><option>TON</option><option>NOS</option><option>METRE</option><option>FEET</option></select></td><td class="eamt">0</td><td><button class="red">×</button></td>`;
+ tr.querySelector('.eunit').value=it.unit||"KG";
+ tr.querySelector('.eqty').oninput=()=>{o.estimate[i].qty=Number(tr.querySelector('.eqty').value)||0;putStore(o);calcEstimate()};
+ tr.querySelector('.eunit').onchange=()=>{o.estimate[i].unit=tr.querySelector('.eunit').value;putStore(o)};
+ tr.querySelector('.red').onclick=()=>{o.estimate.splice(i,1);putStore(o);renderEstimate()};body.appendChild(tr);});
+ document.getElementById('gstPct').oninput=()=>{o.estimateMeta.gst=Number(document.getElementById('gstPct').value)||0;putStore(o);calcEstimate()};
+ document.getElementById('clearEst').onclick=()=>{if(confirm('पूरा Estimate साफ करें?')){o.estimate=[];putStore(o);renderEstimate()}};
+ document.getElementById('printEst').onclick=printEstimate;
+ calcEstimate();
+}
+function calcEstimate(){let sub=0;document.querySelectorAll('#estBody tr').forEach((tr,i)=>{const r=Number((getStore().estimate||[])[i]?.rate)||0,q=Number(tr.querySelector('.eqty')?.value)||0,a=r*q;tr.querySelector('.eamt').textContent='₹ '+fmt(a);sub+=a});const gp=Number(document.getElementById('gstPct')?.value)||0;const ga=sub*gp/100;document.getElementById('subTotal').textContent=fmt(sub);document.getElementById('gstAmt').textContent=fmt(ga);document.getElementById('grandTotal').textContent=fmt(sub+ga)}
+function printEstimate(){const o=getStore(),items=o.estimate||[];let sub=0;const gp=Number(document.getElementById('gstPct')?.value)||0;let rows='';items.forEach(it=>{const a=(Number(it.rate)||0)*(Number(it.qty)||0);sub+=a;rows+=`<tr><td>${esc(it.catName)}</td><td>${esc(it.size)}</td><td>₹ ${fmt(it.rate)}</td><td>${it.qty||1}</td><td>${esc(it.unit||"KG")}</td><td>₹ ${fmt(a)}</td></tr>`});const gst=sub*gp/100,w=window.open('','_blank');if(!w)return;const meta=o.estimateMeta||{}; w.document.write(`<html><head><title>JCT Estimate</title><style>body{font-family:Arial;padding:25px}table{border-collapse:collapse;width:100%;margin-top:15px}th,td{border:1px solid #999;padding:8px;text-align:center}th{background:#eee}.tot{margin-top:18px;text-align:right;font-size:16px}</style></head><body><h2>JAIN COAL TRADERS</h2><h3>ESTIMATE</h3><p><b>Party:</b> ${esc(meta.party||"-")} &nbsp; <b>Estimate No.:</b> ${esc(meta.no||"-")}</p><table><tr><th>Category</th><th>Size</th><th>Rate</th><th>Qty</th><th>Unit</th><th>Amount</th></tr>${rows}</table><div class="tot"><p>Subtotal: ₹ ${fmt(sub)}</p><p>GST (${fmt(gp)}%): ₹ ${fmt(gst)}</p><h2>Grand Total: ₹ ${fmt(sub+gst)}</h2></div><script>window.print()<\/script></body></html>`);w.document.close()}
+function render(){
+ const [k,n]=cats.find(x=>x[0]===active);
+ const o=getStore(), rows=o.rows[k]||[];
+ panel.innerHTML=`<h2>${n} — Size Rate Master</h2>
+ <div class="note">ऊपर का <b>Basic Rate</b> बदलने पर A column तुरंत बदलेगा। <b>DIYA</b> अलग से Save रहता है; Edit किए बिना DIYA नहीं बदलेगा।</div>
+ <div class="actions">
+ <button class="green" id="addBtn">+ Size जोड़ें</button>
+ <button class="green" id="saveDiyaBtn">💾 DIYA Save</button>
+ <span class="status" id="status"></span>
+ </div>
+ <div class="tools">
+   <input id="sizeSearch" placeholder="🔍 Size खोजें...">
+   <button class="gray" id="copyBtn">📋 Copy Rates</button>
+   <button class="gray" id="printBtn">🖨️ Print</button>
+   <button class="gray" id="historyBtn">📜 History</button>
+   <span class="count" id="rowCount"></span>
+ </div>
+ <table><thead><tr><th>Size</th><th>A — Basic Rate</th><th>DIYA</th><th>Final Rate</th><th>Qty</th><th>Unit</th><th>Edit</th><th>Estimate</th><th>Delete</th></tr></thead>
+ <tbody id="tbody"></tbody></table>`;
+ document.getElementById("addBtn").onclick=()=>addRow(k,"","");
+ document.getElementById("saveDiyaBtn").onclick=()=>{syncRows();setStatus("DIYA Saved ✓")};
+document.getElementById("sizeSearch").oninput=filterRows;
+document.getElementById("copyBtn").onclick=copyRates;
+document.getElementById("printBtn").onclick=printRates;
+document.getElementById("historyBtn").onclick=showHistory;
+ rows.forEach(r=>addRow(k,r.size,r.diya,false,r.qty||"1",r.unit||"KG"));
+ calc();
+}
+function addRow(k,size="",diya="",sync=true,qty="1",unit="KG"){
+ const tb=document.getElementById("tbody"); if(!tb)return;
+ const tr=document.createElement("tr");
+ tr.dataset.k=k;
+ tr.innerHTML=`<td><input class="size" value="${esc(size)}" placeholder="जैसे 1X1"></td>
+ <td class="basic">0</td>
+ <td><input class="diya" type="number" step="0.01" value="${esc(diya)}" readonly></td>
+ <td class="final">0</td>
+ <td><input class="qty" type="number" min="0" step="0.01" value="${esc(qty)}"></td>
+ <td><select class="unit"><option>KG</option><option>QUINTAL</option><option>TON</option><option>NOS</option><option>METRE</option><option>FEET</option></select></td>
+ <td><button class="gray edit">✏️ Edit</button></td>
+ <td><button class="green addest">＋ Estimate</button></td>
+ <td><button class="red del">×</button></td>`;
+ tr.querySelector(".size").addEventListener("input",()=>syncRows());
+ tr.querySelector(".diya").addEventListener("input",()=>{calc();syncRows()});
+ tr.querySelector(".edit").onclick=()=>{
+   const inp=tr.querySelector(".diya"),btn=tr.querySelector(".edit");
+   inp.readOnly=false;inp.focus();btn.textContent="💾 Save";
+   btn.onclick=()=>{inp.readOnly=true;btn.textContent="✏️ Edit";syncRows();calc();setStatus("DIYA Saved ✓")};
+ };
+ tr.querySelector(".addest").onclick=()=>{
+   const size=tr.querySelector(".size").value.trim();
+   const diya=Number(tr.querySelector(".diya").value)||0;
+   const base=Number(document.getElementById("base_"+k)?.value)||0;
+   if(!size){alert("पहले Size डालें।");return;}
+   const e=getStore(); e.estimate=e.estimate||[];
+   const idx=e.estimate.findIndex(x=>x.cat===k&&x.size===size);
+   const catName=(cats.find(x=>x[0]===k)||[k,k])[1];
+   const qty=Number(tr.querySelector(".qty")?.value)||1;
+   const unit=tr.querySelector(".unit")?.value||"KG";
+   const item={cat:k,catName:catName,size,rate:base+diya,qty:qty,unit:unit};
+   if(idx>=0)e.estimate[idx]=item;else e.estimate.push(item);
+   putStore(e); setStatus("Estimate में जोड़ दिया ✓");
+ };
+ tr.querySelector(".del").onclick=()=>{if(confirm("यह Size हटाएँ?")){tr.remove();syncRows()}};
+ tr.querySelector(".unit").value=unit;
+ tr.querySelector(".qty").addEventListener("input",()=>syncRows());
+ tr.querySelector(".unit").addEventListener("change",()=>syncRows());
+ tb.appendChild(tr);calc();if(sync)syncRows();
+}
+function calc(){
+ const b=Number(document.getElementById("base_"+active)?.value)||0;
+ document.querySelectorAll("#tbody tr").forEach(tr=>{
+   const d=Number(tr.querySelector(".diya").value)||0;
+   tr.querySelector(".basic").textContent=fmt(b);
+   tr.querySelector(".final").textContent=fmt(b+d);
+ });
+ filterRows();
+}
+function syncRows(){
+ const o=getStore(),k=active;
+ o.rows=o.rows||{};
+ o.rows[k]=[...document.querySelectorAll("#tbody tr")].map(tr=>({
+   size:tr.querySelector(".size").value,
+   diya:tr.querySelector(".diya").value,
+   qty:tr.querySelector(".qty")?.value||"1",
+   unit:tr.querySelector(".unit")?.value||"KG"
+ }));
+ putStore(o);
+}
+function setStatus(s){const el=document.getElementById("status");if(el){el.textContent=s;setTimeout(()=>el.textContent="",1800)}}
+
+function boot(){
+ const o=getStore();
+ cats.forEach(([k])=>document.getElementById("base_"+k).value=o.bases?.[k]||"");
+ show("pipe");
+}
+boot();
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js");
+
+function filterRows(){
+ const q=(document.getElementById("sizeSearch")?.value||"").trim().toLowerCase();
+ let shown=0,total=0;
+ document.querySelectorAll("#tbody tr").forEach(tr=>{total++;const v=(tr.querySelector(".size")?.value||"").toLowerCase();const ok=!q||v.includes(q);tr.style.display=ok?"":"none";if(ok)shown++;});
+ const c=document.getElementById("rowCount");if(c)c.textContent=shown+" / "+total+" sizes";
+}
+function copyRates(){
+ const [k,n]=cats.find(x=>x[0]===active),o=getStore(),b=Number(o.bases?.[k]||0),rows=o.rows?.[k]||[];
+ let text=n+"\nBasic Rate: "+fmt(b)+"\n"+"Size | DIYA | Final Rate\n";
+ rows.forEach(r=>{if((r.size||"").trim())text+=(r.size||"")+" | "+fmt(Number(r.diya)||0)+" | "+fmt(b+(Number(r.diya)||0))+"\n";});
+ navigator.clipboard?.writeText(text).then(()=>setStatus("Rates copied ✓")).catch(()=>{const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();setStatus("Rates copied ✓")});
+}
+function printRates(){
+ const [k,n]=cats.find(x=>x[0]===active),o=getStore(),b=Number(o.bases?.[k]||0),rows=o.rows?.[k]||[];
+ const w=window.open("","_blank");if(!w)return;
+ let h='<html><head><title>'+esc(n)+' Rate List</title><style>body{font-family:Arial;padding:20px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #999;padding:7px;text-align:center}th{background:#eee}</style></head><body><h2>JAIN COAL TRADERS — '+esc(n)+'</h2><p>Basic Rate: '+fmt(b)+'</p><table><tr><th>Size</th><th>Basic Rate</th><th>DIYA</th><th>Final Rate</th></tr>';
+ rows.forEach(r=>{h+='<tr><td>'+esc(r.size||"")+'</td><td>'+fmt(b)+'</td><td>'+fmt(Number(r.diya)||0)+'</td><td>'+fmt(b+(Number(r.diya)||0))+'</td></tr>'});
+ h+='</table><script>window.print();<\/script></body></html>';w.document.write(h);w.document.close();
+}
+function showHistory(){
+ const hist=getStore().history||{};const all=[];
+ Object.entries(hist).forEach(([k,arr])=>arr.forEach(x=>all.push({...x,cat:(cats.find(c=>c[0]===k)||[k,k])[1]})));
+ all.sort((a,b)=>new Date(b.time)-new Date(a.time));
+ const lines=all.slice(0,30).map(x=>new Date(x.time).toLocaleString()+" — "+x.cat+" — "+x.rate);
+ alert(lines.length?"पिछले Rate Changes\n\n"+lines.join("\n"):"अभी कोई Rate History नहीं है।");
+}
+</script>
+
+<script>
+(function(){
+  const KEY='JCT_RATE_MASTER_FINAL_V2';
+  function getData(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){return {}}}
+  function downloadBackup(){
+    const blob=new Blob([JSON.stringify(getData(),null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='JCT_Rate_Master_Backup.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  }
+  function restoreBackup(){
+    const i=document.createElement('input'); i.type='file'; i.accept='.json,application/json';
+    i.onchange=()=>{const f=i.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{try{const d=JSON.parse(r.result); localStorage.setItem(KEY,JSON.stringify(d)); alert('Backup restore हो गया।'); location.reload()}catch(e){alert('Backup file सही नहीं है।')}}; r.readAsText(f)}; i.click();
+  }
+  window.jctBackup=downloadBackup; window.jctRestore=restoreBackup;
+  const bar=document.createElement('div'); bar.style.cssText='display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:8px;background:#f3f6f4;border-bottom:1px solid #ddd';
+  bar.innerHTML='<button onclick="jctBackup()">📤 Backup</button><button onclick="jctRestore()">📥 Restore</button>';
+  const header=document.querySelector('.zoombar'); if(header) header.after(bar); else document.body.prepend(bar);
+})();
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+const cfg=window.JCT_FIREBASE_CONFIG||{};
+const ready=cfg.apiKey && !String(cfg.apiKey).startsWith('PASTE_') && cfg.projectId && !String(cfg.projectId).startsWith('PASTE_');
+let auth=null,db=null,user=null,saveTimer=null;
+function status(t,good=false){const s=document.getElementById('cloudStatus'),m=document.getElementById('cloudText');if(s){s.textContent=good?'• ☁️ Synced':'• '+t;s.style.color=good?'#b9f6ca':''}if(m)m.textContent=t;}
+window.openCloud=()=>{document.getElementById('cloudModal').classList.remove('hidden');document.getElementById('cloudMsg').textContent=ready?(user?('Logged in: '+user.email):'Login करें या नया account बनाएं।'):'पहले firebase-config.js में Firebase Web App config डालना होगा।';};
+window.closeCloud=()=>document.getElementById('cloudModal').classList.add('hidden');
+async function init(){if(!ready){status('Local • Cloud setup बाकी है');return;}try{const app=initializeApp(cfg);auth=getAuth(app);db=getFirestore(app);onAuthStateChanged(auth,async u=>{user=u;if(u){status('Cloud connected • '+u.email,true);await pullCloud();}else status('Local • Login नहीं है');});}catch(e){status('Cloud setup error • Local mode जारी है');console.error(e)}}
+window.cloudLogin=async()=>{if(!auth)return alert('पहले firebase-config.js setup करें');try{await signInWithEmailAndPassword(auth,document.getElementById('cloudEmail').value.trim(),document.getElementById('cloudPass').value);alert('Cloud Login सफल।');closeCloud();}catch(e){alert('Login नहीं हुआ: '+(e.code||e.message));}};
+window.cloudSignup=async()=>{if(!auth)return alert('पहले firebase-config.js setup करें');try{await createUserWithEmailAndPassword(auth,document.getElementById('cloudEmail').value.trim(),document.getElementById('cloudPass').value);alert('Cloud Account बन गया। यही email/password दूसरे device पर भी इस्तेमाल करें।');closeCloud();}catch(e){alert('Account नहीं बना: '+(e.code||e.message));}};
+window.cloudLogout=async()=>{if(auth)await signOut(auth);};
+async function pushCloud(){if(!db||!user)return;clearTimeout(saveTimer);saveTimer=setTimeout(async()=>{try{const state=getStore();await setDoc(doc(db,'users',user.uid,'jct','state'),{data:JSON.stringify(state),updatedAt:serverTimestamp(),schema:4},{merge:true});status('Cloud में save हो गया • '+new Date().toLocaleTimeString(),true);}catch(e){status('Cloud save failed • Local data सुरक्षित है');console.error(e)}},500);}
+async function pullCloud(){try{const snap=await getDoc(doc(db,'users',user.uid,'jct','state'));if(!snap.exists()){await pushCloud();return;}const remote=JSON.parse(snap.data().data||'{}');if(remote&&typeof remote==='object'){localStorage.setItem(key,JSON.stringify(remote));if(typeof renderRateInputs==='function')renderRateInputs();if(typeof show==='function')show(active);status('Cloud से data sync हो गया',true);}}catch(e){status('Cloud read failed • Local data सुरक्षित है');console.error(e)}}
+window.cloudBackup=async()=>{if(!user)return alert('पहले Cloud Login करें');try{const state=getStore();const id='backup-'+Date.now();await setDoc(doc(db,'users',user.uid,'jct',id),{data:JSON.stringify(state),createdAt:serverTimestamp(),type:'manual-backup'},{merge:true});alert('Cloud Backup सुरक्षित हो गया। ID: '+id);}catch(e){alert('Backup failed: '+e.message)}};
+window.cloudRestore=async()=>{if(!user)return alert('पहले Cloud Login करें');const id=prompt('Cloud backup ID डालें:');if(!id)return;try{const snap=await getDoc(doc(db,'users',user.uid,'jct',id));if(!snap.exists())return alert('Backup नहीं मिला');const data=JSON.parse(snap.data().data);if(!confirm('इस backup से current device का data replace करें?'))return;localStorage.setItem(key,JSON.stringify(data));if(typeof renderRateInputs==='function')renderRateInputs();show(active);alert('Cloud Restore हो गया।');}catch(e){alert('Restore failed: '+e.message)}};
+window.jctCloudPush=pushCloud;init();
+</script>
+</body>
+</html>

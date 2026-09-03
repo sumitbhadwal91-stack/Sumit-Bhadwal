@@ -1,0 +1,38 @@
+JCT RATE MASTER — CLOUD SYNC FINAL
+=================================
+
+यह version mobile और computer दोनों पर एक ही Cloud Account के साथ data sync करने के लिए बनाया गया है।
+Internet न होने पर local data से काम जारी रहेगा।
+
+पहली बार केवल एक बार setup:
+
+1) Firebase Console खोलें और नया Project बनाएं.
+2) Project में Web App (</>) add करें.
+3) Web App का config copy करके firebase-config.js में PASTE करें.
+4) Authentication → Sign-in method → Email/Password ON करें.
+5) Firestore Database → Create database करें.
+6) Firestore Rules में यह लगाएं:
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/jct/{docId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
+
+7) Firebase config और बाकी files GitHub repository में upload करें.
+8) GitHub Pages ON करके site खोलें.
+9) Mobile में Cloud Login / Setup → Create Account करें.
+10) Computer पर वही Email + Password से Login करें.
+
+इसके बाद:
+- Basic Rates, DIYA, Sizes और Estimates Cloud में sync होंगे.
+- Local Backup/Restore भी उपलब्ध है.
+- Cloud Backup manually भी बनाया जा सकता है.
+
+जरूरी:
+- firebase-config.js में Firebase Web config रखना सामान्य है; असली सुरक्षा Firestore Rules से होती है.
+- Firebase account का password किसी के साथ share न करें.
+- इस software में local-first design रखा गया है: Cloud fail होने पर local data delete नहीं होता.

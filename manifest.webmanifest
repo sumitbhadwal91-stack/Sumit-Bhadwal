@@ -1,0 +1,13 @@
+{
+  "name": "Sumit Bhadwal Application",
+  "short_name": "SB BALA",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f3f6f4",
+  "theme_color": "#137333",
+  "id": "sumit-bhadwal-application-v6",
+  "icons": [
+    {"src":"icons/sb-bala-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"icons/sb-bala-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}
