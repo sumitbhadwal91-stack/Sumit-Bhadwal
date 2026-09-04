@@ -1,11 +1,8 @@
-// JCT Rate Master - Firebase configuration
-// Paste your Firebase Web App config here after creating your Firebase project.
-// IMPORTANT: Firebase web config is not a password. Protect the database with Firebase Security Rules.
 window.JCT_FIREBASE_CONFIG = {
-  apiKey: "PASTE_API_KEY",
-  authDomain: "PASTE_PROJECT.firebaseapp.com",
-  projectId: "PASTE_PROJECT_ID",
-  storageBucket: "PASTE_PROJECT.firebasestorage.app",
-  messagingSenderId: "PASTE_SENDER_ID",
-  appId: "PASTE_APP_ID"
+  apiKey: "AIzaSyAIUPyUi4Anp8mA_fRMyNDKP5lHYUZ80Tw",
+  authDomain: "sumit-bhadwal-steel.firebaseapp.com",
+  projectId: "sumit-bhadwal-steel",
+  storageBucket: "sumit-bhadwal-steel.firebasestorage.app",
+  messagingSenderId: "1029330125971",
+  appId: "1:1029330125971:web:c4c06e0a3442b296d37966"
 };
